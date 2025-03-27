@@ -1,0 +1,7 @@
+{
+  "name": "PowerLiftAi",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
