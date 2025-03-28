@@ -1,0 +1,16 @@
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-column-gap: 5px;
+    grid-row-gap: 5px;
+}
+
+.gallery-img {
+    min-width: 50px;
+}
+
+.card {
+    margin-top: 0;
+    margin-left: 0;
+    margin-right: 0;
+}
