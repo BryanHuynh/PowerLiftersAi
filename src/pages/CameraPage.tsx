@@ -43,7 +43,7 @@ const CameraPage: React.FC = () => {
           {tracking ? "Stop Tracking" : "Start Tracking"}
         </IonButton>
       </IonContent>
-      <Footer />
+      <Footer current='camera' />
     </IonPage>
   );
 };

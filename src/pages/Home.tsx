@@ -21,7 +21,7 @@ const Home: React.FC = () => {
         <HomeLiftCard lift={Lift.DEADLIFT}></HomeLiftCard>
       </IonContent>
 
-      <Footer />
+      <Footer current="home"/>
     </IonPage>
   );
 };
