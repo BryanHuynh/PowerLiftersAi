@@ -34,7 +34,7 @@ import './theme/variables.css';
 import Home from './pages/Home';
 import Gallery from './pages/Gallery';
 import { check_and_create_directories } from './utils/Startup';
-import { Directory } from '@capacitor/filesystem';
+import CameraPage from './pages/CameraPage';
 
 setupIonicReact();
 console.log('App Started');
@@ -49,6 +49,9 @@ const App: React.FC = () => (
         <Home/>
       </Route>
       <Redirect exact from="/" to="/home" />
+      <Route path="/camera" exact={true}>
+        <CameraPage/>
+      </Route>
       <Route path="/gallery/:category" exact={true}>
         <Gallery/>
       </Route>

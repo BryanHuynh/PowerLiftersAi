@@ -1,0 +1,14 @@
+.user-media-container {
+    position: relative;
+}
+
+.user-media {
+  min-height: 500px;
+  max-width: 400px;
+  margin-inline: auto;
+}
+#user-canvas {
+  position: absolute; /* Will overlay the video stream. */
+  top: 45px; /* Place it aprox. after the button space */
+  object-fit: contain;
+}

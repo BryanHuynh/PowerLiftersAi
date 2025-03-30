@@ -6,10 +6,16 @@ import "./Footer.css";
 const Footer: React.FC = () => {
 
 	const history = useHistory();
-	const onClickHome = () => {
+	const onClickHome = (event: React.MouseEvent<HTMLIonIconElement>) => {
+    event.preventDefault();
 		history.push('/home')
 	}
 
+
+  function onClickCamera(event: React.MouseEvent<HTMLIonIconElement>): void {
+    event.preventDefault();
+    history.push('/camera');
+  }
 
   return (
     <IonFooter>
@@ -20,7 +26,7 @@ const Footer: React.FC = () => {
               <IonIcon icon={homeOutline} size="large" onClick={onClickHome}/>
             </IonCol>
             <IonCol size="auto">
-              <IonIcon icon={cameraOutline} size="large" />
+              <IonIcon icon={cameraOutline} size="large" onClick={onClickCamera}/>
             </IonCol>
             <IonCol size="auto">
               <IonIcon icon={personOutline} size="large" />
