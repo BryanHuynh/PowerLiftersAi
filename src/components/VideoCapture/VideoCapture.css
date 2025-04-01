@@ -1,0 +1,23 @@
+.container {
+    display:relative;
+}
+
+.media-preview {
+  height: fit-content;
+  background-color: gray;
+}
+
+#camera-preview
+{
+    width: 100%;
+}
+
+#canvas-preview {
+  position: absolute; /* Will overlay the video stream. */
+  /* top: 45px; Place it aprox. after the button space */
+  object-fit: contain;
+  opacity: 50%;
+  border-color: aqua;
+  border-style: solid;
+  border-width: 1px;
+}
