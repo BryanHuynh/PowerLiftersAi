@@ -5,8 +5,14 @@ import {
 import HomeLiftCard from "../components/Home/HomeLiftCard";
 import Footer from "../components/Footer/Footer";
 import { Lift } from "../Constants/Constants";
+import { useEffect } from "react";
+import { check_and_create_directories } from "../utils/Startup";
 
 const Home: React.FC = () => {
+  useEffect(() => {
+    check_and_create_directories(); 
+  },[]) 
+  
   return (
     <IonPage>
       <IonHeader>

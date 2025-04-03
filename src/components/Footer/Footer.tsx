@@ -1,4 +1,4 @@
-import { IonCol, IonFooter, IonGrid, IonIcon, IonRow, IonToolbar } from '@ionic/react';
+import { IonButton, IonCol, IonFooter, IonGrid, IonIcon, IonRow, IonToolbar } from '@ionic/react';
 import { personOutline, cameraOutline, camera, homeOutline, home} from 'ionicons/icons';
 import { useHistory } from 'react-router';
 import "./Footer.css";
@@ -28,7 +28,9 @@ const Footer: React.FC<FooterProps> = ({current}) => {
         <IonGrid>
           <IonRow className="ion-justify-content-center ion-align-items-center ion-justify-content-evenly">
             <IonCol size="auto">
-              <IonIcon icon={current === "home" ? home : homeOutline} size="large" onClick={onClickHome}/>
+              <IonButton routerLink='/home'>
+                <IonIcon icon={current === "home" ? home : homeOutline} size="large" />
+              </IonButton>
             </IonCol>
             <IonCol size="auto">
               <IonIcon icon={current == "camera" ? camera : cameraOutline} size="large" onClick={onClickCamera}/>

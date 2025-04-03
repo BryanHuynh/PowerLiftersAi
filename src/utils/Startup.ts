@@ -47,11 +47,11 @@ export const check_and_create_directories = async () => {
     check_category_directories_exists().then((exist) => {
         if(exist){
             console.log("Directories already exist");
-            return;
         }else{
             create_directories();
             console.log('Directories created')
         }
+        return exist;
     });
 }
 
