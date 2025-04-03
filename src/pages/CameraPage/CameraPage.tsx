@@ -15,7 +15,8 @@ import VideoCapture from "../../components/VideoCapture/VideoCapture";
 import { fetchCameraDeviceIds } from "./util";
 
 const CameraPage: React.FC = () => {
-  const [tracking, setTracking] = useState(false);
+  // const [tracking, setTracking] = useState<boolean>(false);
+  const trackingRef = useRef<boolean>(false);
   const [cameraDevices, setCameraDevices] = useState<string []>([]);
   const [cameraFacing, setCameraFacing]  = useState(1);
   const [cameraLoaded, setCameraLoaded] = useState(false);
@@ -38,17 +39,19 @@ const CameraPage: React.FC = () => {
     assignCameraDevices();
   }, []);
 
-  useEffect(()=> {
-    console.log('camera facing', cameraFacing);
-  },[cameraFacing]);
 
-  const swapCamera = () => {
-    setCameraFacing(cameraFacing == 0 ? 1 : 0); 
-  }
 
   const toggleTracking = () => {
-    setTracking(!tracking);
+    trackingRef.current = !trackingRef.current;
   };
+
+  const swapCamera = () => {
+    if(cameraFacing == 0) {
+      setCameraFacing(1);
+    } else {
+      setCameraFacing(0);
+    }
+  }
 
   return (
     <IonPage>
@@ -62,18 +65,18 @@ const CameraPage: React.FC = () => {
       </IonHeader>
       <IonContent fullscreen className="ion-padding">
         {cameraDevices.length > 0 && cameraLoaded? (
-          <VideoCapture deviceId={cameraDevices[cameraFacing]} />
+          <VideoCapture deviceId={cameraDevices[cameraFacing]} trackingOverlayRef={trackingRef} />
         ) : (
           <></>
         )}
 
         <IonButton
-          color={!tracking ? "success" : "danger"}
+          color={!trackingRef.current ? "success" : "danger"}
           onClick={() => {
             toggleTracking();
           }}
         >
-          {tracking ? "Stop Tracking" : "Start Tracking"}
+          {trackingRef.current ? "Disable Tracking" : "Start Tracking"}
         </IonButton>
         <IonButton
           onClick={() => {

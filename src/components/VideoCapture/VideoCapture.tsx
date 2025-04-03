@@ -10,13 +10,16 @@ import { Capacitor } from "@capacitor/core";
 
 interface VideoCameraProps {
   deviceId: string;
+  trackingOverlayRef: React.RefObject<boolean>
 }
 
-const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId }) => {
+const VideoCapture: React.FC<VideoCameraProps> = ({
+  deviceId,
+  trackingOverlayRef,
+}) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
-
   const streamRef = useRef<MediaStream | null>(null);
   const poseLandmarkerRef: useRef<typeof PoseLandmarker> = useRef(null);
 
@@ -44,7 +47,6 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId }) => {
   const startTracking = async () => {
     let lastVideoTime = -1;
     let results: any = undefined;
-
     if (
       canvasRef.current &&
       videoRef.current &&
@@ -66,7 +68,8 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId }) => {
               canvasRef.current &&
               videoRef.current &&
               canvasCtxRef.current &&
-              poseLandmarkerRef.current
+              poseLandmarkerRef.current &&
+              trackingOverlayRef.current
             ) {
               canvasCtxRef.current.save();
               canvasCtxRef.current.clearRect(
@@ -93,6 +96,7 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId }) => {
       window.requestAnimationFrame(startTracking);
     }
   };
+
   const startWebcam = async () => {
     if (Capacitor.getPlatform() == "android") {
       await requestPermissions();
@@ -152,6 +156,8 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId }) => {
     };
   }, [deviceId]);
 
+
+  
 
   return (
     <div className="container">

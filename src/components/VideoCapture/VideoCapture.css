@@ -10,6 +10,7 @@
 #camera-preview
 {
     width: 100%;
+    display:block;
 }
 
 #canvas-preview {
