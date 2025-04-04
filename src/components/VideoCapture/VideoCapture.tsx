@@ -41,7 +41,7 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef
 	const displayVideoDetections = (result: PoseLandmarkerResult, drawingUtils: DrawingUtils, canvasCtx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
 		if (trackingOverlayRef.current) {
 			canvasCtx.save()
-			canvasCtx.clearRect(0, 0, canvas.width, canvas.height)
+			// canvasCtx.clearRect(0, 0, canvas.width, canvas.height)
 			const landmarks = result.landmarks
 			// console.log('Shoulder', landmarks[0][12])
 			// console.log('elbow', landmarks[0][14])
