@@ -8,9 +8,10 @@ interface VideoCameraProps {
 	deviceId: string
 	trackingOverlayRef: React.RefObject<boolean>
 	isRecording: boolean
+	onRecordingFinished: () => void;
 }
 
-const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef, isRecording }) => {
+const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef, isRecording, onRecordingFinished}) => {
 	const videoRef = useRef<HTMLVideoElement | null>(null)
 	const canvasRef = useRef<HTMLCanvasElement | null>(null)
 	const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null)
@@ -124,14 +125,15 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef
 			}
 
 			recorder.onstop = () => {
-				console.log('Recording stopped')
-				const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' })
-				const url = URL.createObjectURL(blob)
-				const a = document.createElement('a')
-				a.href = url
-				a.download = 'recorded-video.webm'
-				a.click()
-				URL.revokeObjectURL(url)
+				console.log('Recording stopped');
+				const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = 'recorded-video.webm';
+				a.click();
+				URL.revokeObjectURL(url);
+				onRecordingFinished();
 			}
 
 			recorder.start()

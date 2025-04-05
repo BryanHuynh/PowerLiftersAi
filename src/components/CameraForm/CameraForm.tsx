@@ -1,0 +1,26 @@
+import { IonBackButton, IonButton, IonButtons, IonContent, IonHeader, IonModal, IonPage, IonTitle, IonToolbar } from '@ionic/react'
+
+interface CameraForm {
+	isOpen: boolean
+	onClose: () => void
+}
+
+const CameraForm: React.FC<CameraForm> = ({ isOpen, onClose }) => {
+	return (
+		<IonModal isOpen={isOpen}>
+			<IonHeader>
+				<IonToolbar>
+					<IonTitle>Modal</IonTitle>
+					<IonButtons slot="end">
+						<IonButton onClick={onClose}>Close</IonButton>
+					</IonButtons>
+				</IonToolbar>
+			</IonHeader>
+			<IonContent className="ion-padding">
+				<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Magni illum quidem recusandae ducimus quos reprehenderit. Veniam, molestias quos, dolorum consequuntur nisi deserunt omnis id illo sit cum qui. Eaque, dicta.</p>
+			</IonContent>
+		</IonModal>
+	)
+}
+
+export default CameraForm
