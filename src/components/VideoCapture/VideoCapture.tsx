@@ -3,6 +3,7 @@ import { Camera } from '@capacitor/camera'
 import './VideoCapture.css'
 import { DrawingUtils, PoseLandmarker, FilesetResolver, PoseLandmarkerResult, FaceLandmarker } from '@mediapipe/tasks-vision'
 import { Capacitor } from '@capacitor/core'
+import { saveMedia } from '../../utils/MediaSaving'
 
 interface VideoCameraProps {
 	deviceId: string
@@ -64,8 +65,8 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef
 			const startTimeMs = performance.now()
 			if (lastVideoTime != videoRef.current.currentTime) {
 				lastVideoTime = videoRef.current.currentTime
-				const landMarkerResults = poseLandmarkerRef.current.detectForVideo(videoRef.current, startTimeMs)
-				displayVideoDetections(landMarkerResults, drawingUtils, canvasCtxRef.current, canvasRef.current)
+				// const landMarkerResults = poseLandmarkerRef.current.detectForVideo(videoRef.current, startTimeMs)
+				// displayVideoDetections(landMarkerResults, drawingUtils, canvasCtxRef.current, canvasRef.current)
 			}
 
 			window.requestAnimationFrame(startTracking)
@@ -127,12 +128,9 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef
 			recorder.onstop = () => {
 				console.log('Recording stopped');
 				const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
-				const url = URL.createObjectURL(blob);
-				const a = document.createElement('a');
-				a.href = url;
-				a.download = 'recorded-video.webm';
-				a.click();
-				URL.revokeObjectURL(url);
+				saveMedia('Squat', blob, 'temp.webm').then((res) => {
+					console.log(res);
+				});
 				onRecordingFinished();
 			}
 

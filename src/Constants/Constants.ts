@@ -7,7 +7,7 @@ export const VIDEO_DIRECTORY_PATH: string = "/powerLiftersAI/data/videos";
 export const liftDirectoryPaths: { [key in LiftDirectoryPathType]: string } = {
   Squat: `${VIDEO_DIRECTORY_PATH}/Squat/`,
   BenchPress: `${VIDEO_DIRECTORY_PATH}/BenchPress/`,
-  Deadlift: `/powerLiftersAI/data/videos/Deadlift`
+  Deadlift: `${VIDEO_DIRECTORY_PATH}/Deadlift/`
 };
 
 export const stringToLiftCategory = (string: string): Lift => {
