@@ -3,9 +3,10 @@ import { IonBackButton, IonButton, IonButtons, IonContent, IonHeader, IonModal, 
 interface CameraForm {
 	isOpen: boolean
 	onClose: () => void
+	onSubmit: (data: string) => void;
 }
 
-const CameraForm: React.FC<CameraForm> = ({ isOpen, onClose }) => {
+const CameraForm: React.FC<CameraForm> = ({ isOpen, onClose, onSubmit}) => {
 	return (
 		<IonModal isOpen={isOpen}>
 			<IonHeader>

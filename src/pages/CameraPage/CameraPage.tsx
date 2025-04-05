@@ -48,6 +48,10 @@ const CameraPage: React.FC = () => {
 		setIsRecordingFinished(true);
 	}
 
+	const onFormSubmitted = (data: string) => {
+		console.log(JSON.parse(data))
+	}
+
 	return (
 		<IonPage>
 			<IonHeader>
@@ -60,7 +64,7 @@ const CameraPage: React.FC = () => {
 			</IonHeader>
 			<IonContent fullscreen className="ion-padding">
 				{cameraDevices.length > 0 && cameraLoaded ? <VideoCapture deviceId={cameraDevices[cameraFacing]} trackingOverlayRef={trackingRef} isRecording={isRecording} onRecordingFinished={onRecordingFinished} /> : <></>}
-				<CameraForm isOpen={isRecordingFinished} onClose={() => setIsRecordingFinished(false)} />
+				<CameraForm isOpen={isRecordingFinished} onClose={() => setIsRecordingFinished(false)} onSubmit={(data) => onFormSubmitted(data)}/>
 				<IonButtons>
 					<IonButton
 						color={trackingOverlay ? 'danger' : 'success'}
