@@ -64,8 +64,8 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef
 			const startTimeMs = performance.now()
 			if (lastVideoTime != videoRef.current.currentTime) {
 				lastVideoTime = videoRef.current.currentTime
-				// const landMarkerResults = poseLandmarkerRef.current.detectForVideo(videoRef.current, startTimeMs)
-				// displayVideoDetections(landMarkerResults, drawingUtils, canvasCtxRef.current, canvasRef.current)
+				const landMarkerResults = poseLandmarkerRef.current.detectForVideo(videoRef.current, startTimeMs)
+				displayVideoDetections(landMarkerResults, drawingUtils, canvasCtxRef.current, canvasRef.current)
 			}
 
 			window.requestAnimationFrame(startTracking)

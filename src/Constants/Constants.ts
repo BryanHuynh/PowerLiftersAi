@@ -23,6 +23,19 @@ export const stringToLiftCategory = (string: string): Lift => {
     }
 };
 
+export const liftCategoryToLiftDirectoryPathType = (lift: Lift): LiftDirectoryPathType => {
+    switch(lift) {
+        case Lift.SQUAT:
+            return 'Squat';
+        case Lift.BENCH_PRESS:
+            return 'BenchPress';
+        case Lift.DEADLIFT:
+            return 'Deadlift';
+            
+    }
+};
+
+
 
 export enum Lift {
     SQUAT = 'Squat',
