@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { Camera } from '@capacitor/camera'
 import './VideoCapture.css'
-import { DrawingUtils, PoseLandmarker, FilesetResolver, PoseLandmarkerResult, FaceLandmarker } from '@mediapipe/tasks-vision'
+import { DrawingUtils, PoseLandmarker, FilesetResolver, PoseLandmarkerResult } from '@mediapipe/tasks-vision'
 import { Capacitor } from '@capacitor/core'
 
 interface VideoCameraProps {
 	deviceId: string
 	trackingOverlayRef: React.RefObject<boolean>
 	isRecording: boolean
-	onRecordingFinished: () => void;
+	onRecordingFinished: (blob: Blob) => void;
 }
 
 const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef, isRecording, onRecordingFinished}) => {
@@ -64,8 +64,8 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef
 			const startTimeMs = performance.now()
 			if (lastVideoTime != videoRef.current.currentTime) {
 				lastVideoTime = videoRef.current.currentTime
-				const landMarkerResults = poseLandmarkerRef.current.detectForVideo(videoRef.current, startTimeMs)
-				displayVideoDetections(landMarkerResults, drawingUtils, canvasCtxRef.current, canvasRef.current)
+				// const landMarkerResults = poseLandmarkerRef.current.detectForVideo(videoRef.current, startTimeMs)
+				// displayVideoDetections(landMarkerResults, drawingUtils, canvasCtxRef.current, canvasRef.current)
 			}
 
 			window.requestAnimationFrame(startTracking)
@@ -126,14 +126,8 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef
 
 			recorder.onstop = () => {
 				console.log('Recording stopped');
-				const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
-				const url = URL.createObjectURL(blob);
-				const a = document.createElement('a');
-				a.href = url;
-				a.download = 'recorded-video.webm';
-				a.click();
-				URL.revokeObjectURL(url);
-				onRecordingFinished();
+				const blob = new Blob(recordedChunksRef.current, { type: 'video/mp4' });
+				onRecordingFinished(blob);
 			}
 
 			recorder.start()
