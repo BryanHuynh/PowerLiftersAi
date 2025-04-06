@@ -5,6 +5,7 @@ import './CameraPage.css'
 import VideoCapture from '../../components/VideoCapture/VideoCapture'
 import { fetchCameraDeviceIds } from './util'
 import CameraForm from '../../components/CameraForm/CameraForm'
+import { getCurrentDateToMinutes, saveMedia } from '../../utils/MediaSaving'
 
 const CameraPage: React.FC = () => {
 	const trackingRef = useRef<boolean>(false)
@@ -14,6 +15,8 @@ const CameraPage: React.FC = () => {
 	const [cameraLoaded, setCameraLoaded] = useState(false)
 	const [isRecording, setIsRecording] = useState(false)
 	const [isRecordingFinished, setIsRecordingFinished] = useState<boolean>(false)
+	const mediaBlobRef = useRef<Blob>(null);
+
 	useEffect(() => {
 		console.log('starting camera')
 
@@ -44,12 +47,19 @@ const CameraPage: React.FC = () => {
 		setIsRecording(!isRecording)
 	}
 
-	const onRecordingFinished = () => {
+	const onRecordingFinished = (blob: Blob) => {
 		setIsRecordingFinished(true);
+		mediaBlobRef.current = blob;
+
 	}
 
-	const onFormSubmitted = (data: string) => {
-		console.log(JSON.parse(data))
+	const onFormSubmitted = async (data: string) => {
+		const _data = JSON.parse(data)
+		console.log(_data)
+		if(mediaBlobRef.current){
+			await saveMedia(_data['category'], mediaBlobRef.current, `${_data['category']}_${getCurrentDateToMinutes()}.mp4`)
+			mediaBlobRef.current = null;
+		}
 	}
 
 	return (
@@ -63,7 +73,7 @@ const CameraPage: React.FC = () => {
 				</IonToolbar>
 			</IonHeader>
 			<IonContent fullscreen className="ion-padding">
-				{cameraDevices.length > 0 && cameraLoaded ? <VideoCapture deviceId={cameraDevices[cameraFacing]} trackingOverlayRef={trackingRef} isRecording={isRecording} onRecordingFinished={onRecordingFinished} /> : <></>}
+				{cameraDevices.length > 0 && cameraLoaded ? <VideoCapture deviceId={cameraDevices[cameraFacing]} trackingOverlayRef={trackingRef} isRecording={isRecording} onRecordingFinished={(blob) => onRecordingFinished(blob)} /> : <></>}
 				<CameraForm isOpen={isRecordingFinished} onClose={() => setIsRecordingFinished(false)} onSubmit={(data) => onFormSubmitted(data)}/>
 				<IonButtons>
 					<IonButton

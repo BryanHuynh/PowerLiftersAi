@@ -1,15 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { Camera } from '@capacitor/camera'
 import './VideoCapture.css'
-import { DrawingUtils, PoseLandmarker, FilesetResolver, PoseLandmarkerResult, FaceLandmarker } from '@mediapipe/tasks-vision'
+import { DrawingUtils, PoseLandmarker, FilesetResolver, PoseLandmarkerResult } from '@mediapipe/tasks-vision'
 import { Capacitor } from '@capacitor/core'
-import { saveMedia } from '../../utils/MediaSaving'
 
 interface VideoCameraProps {
 	deviceId: string
 	trackingOverlayRef: React.RefObject<boolean>
 	isRecording: boolean
-	onRecordingFinished: () => void;
+	onRecordingFinished: (blob: Blob) => void;
 }
 
 const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef, isRecording, onRecordingFinished}) => {
@@ -127,11 +126,8 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef
 
 			recorder.onstop = () => {
 				console.log('Recording stopped');
-				const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
-				saveMedia('Squat', blob, 'temp.webm').then((res) => {
-					console.log(res);
-				});
-				onRecordingFinished();
+				const blob = new Blob(recordedChunksRef.current, { type: 'video/mp4' });
+				onRecordingFinished(blob);
 			}
 
 			recorder.start()

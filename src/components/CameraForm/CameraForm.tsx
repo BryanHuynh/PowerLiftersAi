@@ -7,13 +7,19 @@ interface CameraForm {
 }
 
 const CameraForm: React.FC<CameraForm> = ({ isOpen, onClose, onSubmit}) => {
+	const _onClose = () => {
+		const data = { 'category' : 'Deadlift'}
+		onSubmit(JSON.stringify(data)); 
+		onClose();
+	}
+
 	return (
 		<IonModal isOpen={isOpen}>
 			<IonHeader>
 				<IonToolbar>
 					<IonTitle>Modal</IonTitle>
 					<IonButtons slot="end">
-						<IonButton onClick={onClose}>Close</IonButton>
+						<IonButton onClick={_onClose}>Close</IonButton>
 					</IonButtons>
 				</IonToolbar>
 			</IonHeader>

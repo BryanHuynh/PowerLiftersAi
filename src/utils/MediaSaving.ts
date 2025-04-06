@@ -31,3 +31,13 @@ function convertBlobToBase64(blob: Blob): Promise<string | ArrayBuffer> {
       reader.readAsDataURL(blob); // Use readAsDataURL to get base64
     });
   }
+
+  export const getCurrentDateToMinutes = () => {
+    const now = new Date(); // Get the current date and time
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1; // Month is 0-indexed, so add 1
+    const day = now.getDate();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    return `${year}-${month}-${day}-${hours}-${minutes}`;
+  }
