@@ -86,7 +86,9 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef
 
 		const constraints: MediaStreamConstraints = {
 			video: {
-				deviceId: { exact: deviceId }
+				deviceId: { exact: deviceId },
+				width: { ideal: 4096 },
+				height: { ideal: 2160 } 
 			}
 		}
 		const stream = await navigator.mediaDevices.getUserMedia(constraints)
@@ -115,7 +117,12 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef
 	const startRecording = () => {
 		if (streamRef.current) {
 			recordedChunksRef.current = []
-			const recorder = new MediaRecorder(streamRef.current)
+			streamRef.current.getTracks().forEach((track) => {
+				console.log('compatibilties: ', JSON.stringify(track.getCapabilities()))
+				console.log('settings: ', JSON.stringify(track.getSettings()))
+				console.log('id:', track.id)
+			})
+			const recorder = new MediaRecorder(streamRef.current, { mimeType: 'video/mp4' })
 			mediaRecorderRef.current = recorder
 
 			recorder.ondataavailable = (event) => {
