@@ -7,13 +7,26 @@ import { useParams } from "react-router-dom";
 import Footer from "../components/Footer/Footer";
 import GallerySection from "../components/Gallery/GallerySection";
 import { useEffect } from "react";
-import { stringToLiftCategory } from "../Constants/Constants";
+import { stringToLiftCategory, liftCategoryToLiftDirectoryPathType } from "../Constants/Constants";
+import { getVideoFilenames, getYearMonthDayFromFileNames } from "../utils/FetchImage";
 
 const Gallery: React.FC = () => {
   const params = useParams<{ category: string }>();
   const category = stringToLiftCategory(params.category); 
+
   useEffect(() => {
     console.log("Gallery Loaded", params.category);
+    getVideoFilenames(liftCategoryToLiftDirectoryPathType(category))
+    .then((videoNames) => {
+      console.log(videoNames);
+      const dates = getYearMonthDayFromFileNames(videoNames);
+      dates.forEach((key, value) => console.log(`"${key}" => "${value}"`));
+
+    });
+
+
+    
+     
   }, []);
 
   return (
@@ -27,10 +40,10 @@ const Gallery: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen className="ion-padding">
-        <GallerySection date="2025-03-27" category={category} />
+        {/* <GallerySection date="2025-03-27" category={category} /> */}
       </IonContent>
 
-      <Footer />
+      <Footer current="none"/>
     </IonPage>
   );
 };
