@@ -1,21 +1,34 @@
-import { IonBackButton, IonButton, IonButtons, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react'
+import {
+	IonBackButton,
+	IonButton,
+	IonButtons,
+	IonContent,
+	IonHeader,
+	IonPage,
+	IonTitle,
+	IonToolbar
+} from '@ionic/react'
 import Footer from '../../components/Footer/Footer'
 import { useEffect, useRef, useState } from 'react'
 import './CameraPage.css'
-import VideoCapture from '../../components/VideoCapture/VideoCapture'
+import VideoCapture, {
+	VideoCaptureHandle
+} from '../../components/VideoCapture/VideoCapture'
 import { fetchCameraDeviceIds } from './util'
 import CameraForm from '../../components/CameraForm/CameraForm'
 import { getCurrentDateToMinutes, saveMedia } from '../../utils/MediaSaving'
+import { Lift } from '../../Constants/Constants'
 
 const CameraPage: React.FC = () => {
-	const trackingRef = useRef<boolean>(false)
-	const [trackingOverlay, setTrackingOverlay] = useState<boolean>(false)
+	const [isTrackingOverlay, setIsTrackingOverlay] = useState<boolean>(false)
 	const [cameraDevices, setCameraDevices] = useState<string[]>([])
 	const [cameraFacing, setCameraFacing] = useState(1)
 	const [cameraLoaded, setCameraLoaded] = useState(false)
 	const [isRecording, setIsRecording] = useState(false)
-	const [isRecordingFinished, setIsRecordingFinished] = useState<boolean>(false)
-	const mediaBlobRef = useRef<Blob>(null);
+	const [isRecordingFinished, setIsRecordingFinished] =
+		useState<boolean>(false)
+	const mediaBlobRef = useRef<Blob>(null)
+	const videoCaptureRef = useRef<VideoCaptureHandle>(null)
 
 	useEffect(() => {
 		console.log('starting camera')
@@ -34,10 +47,29 @@ const CameraPage: React.FC = () => {
 		assignCameraDevices()
 	}, [])
 
-	const toggleTracking = () => {
-		trackingRef.current = !trackingRef.current
-		setTrackingOverlay(!trackingOverlay)
-	}
+	useEffect(() => {
+		if (videoCaptureRef && videoCaptureRef.current) {
+			if (isRecording) {
+				console.log('starting recording')
+				videoCaptureRef.current.startRecording()
+			} else {
+				console.log('stopping recording')
+				videoCaptureRef.current.stopRecording()
+			}
+		}
+	}, [isRecording])
+
+	useEffect(() => {
+		if (videoCaptureRef && videoCaptureRef.current) {
+			if (isTrackingOverlay) {
+				console.log('starting tracking')
+				videoCaptureRef.current.startTracking()
+			} else {
+				console.log('stopping tracking')
+				videoCaptureRef.current.stopTracking()
+			}
+		}
+	}, [isTrackingOverlay])
 
 	const swapCamera = () => {
 		setCameraFacing(cameraFacing == 0 ? 1 : 0)
@@ -47,18 +79,25 @@ const CameraPage: React.FC = () => {
 		setIsRecording(!isRecording)
 	}
 
-	const onRecordingFinished = (blob: Blob) => {
-		setIsRecordingFinished(true);
-		mediaBlobRef.current = blob;
+	const toggleTrackingOverlay = () => {
+		setIsTrackingOverlay(!isTrackingOverlay)
+	}
 
+	const onRecordingFinished = (blob: Blob) => {
+		setIsRecordingFinished(true)
+		mediaBlobRef.current = blob
 	}
 
 	const onFormSubmitted = async (data: string) => {
 		const _data = JSON.parse(data)
-		console.log(_data)
-		if(mediaBlobRef.current){
-			await saveMedia(_data['category'], mediaBlobRef.current, `${_data['category']}_${getCurrentDateToMinutes()}.mp4`)
-			mediaBlobRef.current = null;
+		const lift: Lift = _data['category']
+		if (mediaBlobRef.current) {
+			await saveMedia(
+				lift,
+				mediaBlobRef.current,
+				`${_data['category']}_${getCurrentDateToMinutes()}.mp4`
+			)
+			mediaBlobRef.current = null
 		}
 	}
 
@@ -69,37 +108,61 @@ const CameraPage: React.FC = () => {
 					<IonButtons slot="start">
 						<IonBackButton defaultHref="/home"></IonBackButton>
 					</IonButtons>
-					<IonTitle>Camera!</IonTitle>
+					<IonTitle>Camera</IonTitle>
 				</IonToolbar>
 			</IonHeader>
 			<IonContent fullscreen className="ion-padding">
-				{cameraDevices.length > 0 && cameraLoaded ? <VideoCapture deviceId={cameraDevices[cameraFacing]} trackingOverlayRef={trackingRef} isRecording={isRecording} onRecordingFinished={(blob) => onRecordingFinished(blob)} /> : <></>}
-				<CameraForm isOpen={isRecordingFinished} onClose={() => setIsRecordingFinished(false)} onSubmit={(data) => onFormSubmitted(data)}/>
-				<IonButtons>
-					<IonButton
-						color={trackingOverlay ? 'danger' : 'success'}
-						onClick={() => {
-							toggleTracking()
-						}}
+				<div className="camera-container">
+					<div className='video-capture'>
+					{cameraDevices.length > 0 && cameraLoaded ? (
+						<VideoCapture
+							deviceId={cameraDevices[cameraFacing]}
+							onRecordingFinished={(blob) =>
+								onRecordingFinished(blob)
+							}
+							ref={videoCaptureRef}
+						/>
+					) : (
+						<></>
+					)}
+					</div>
+
+					<CameraForm
+						isOpen={isRecordingFinished}
+						onClose={() => setIsRecordingFinished(false)}
+						onSubmit={(data) => onFormSubmitted(data)}
+					/>
+					<IonButtons
+						hidden={cameraLoaded}
+						className="buttons-container"
 					>
-						{trackingOverlay ? 'Disable Tracking' : 'Start Tracking'}
-					</IonButton>
-					<IonButton
-						onClick={() => {
-							swapCamera()
-						}}
-					>
-						flip camera
-					</IonButton>
-					<IonButton
-						color={isRecording ? 'danger' : 'success'}
-						onClick={() => {
-							toggleRecording()
-						}}
-					>
-						{isRecording ? 'stop recording' : 'start recording'}
-					</IonButton>
-				</IonButtons>
+						<IonButton
+							color={isTrackingOverlay ? 'danger' : 'success'}
+							onClick={() => {
+								toggleTrackingOverlay()
+							}}
+						>
+							{isTrackingOverlay
+								? 'Disable Tracking'
+								: 'Start Tracking'}
+						</IonButton>
+						<IonButton
+							onClick={() => {
+								swapCamera()
+							}}
+						>
+							flip camera
+						</IonButton>
+						<IonButton
+							color={isRecording ? 'danger' : 'success'}
+							onClick={() => {
+								toggleRecording()
+							}}
+						>
+							{isRecording ? 'stop recording' : 'start recording'}
+						</IonButton>
+					</IonButtons>
+				</div>
 			</IonContent>
 			<Footer current="camera" />
 		</IonPage>

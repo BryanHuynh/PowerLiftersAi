@@ -1,14 +1,70 @@
-.user-media-container {
-    position: relative;
+/* In CameraPage.css */
+
+/* Ensure IonContent allows its child to fill height */
+/* Note: The ::part(scroll) targets the inner scrollable area of IonContent */
+ion-content::part(scroll) {
+  display: flex;
+  flex-direction: column;
 }
 
-.user-media {
-  min-height: 500px;
-  max-width: 400px;
-  margin-inline: auto;
+/* Make the main container a flex column that fills height */
+.camera-container {
+  flex-grow: 1; /* Allows this container to grow within the IonContent's flex context */
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Explicitly set height */
 }
-#user-canvas {
-  position: absolute; /* Will overlay the video stream. */
-  top: 45px; /* Place it aprox. after the button space */
-  object-fit: contain;
+
+/* Make the video area take up the available space */
+.video-capture {
+  flex-grow: 1; /* This div will expand, pushing buttons down */
+  position: relative; /* Needed for absolute positioning of video/canvas inside if any */
+  overflow: hidden; /* Prevent video overflow */
+  background-color: #000; /* Optional: background for empty space */
+  display: flex; /* Center video element if it doesn't fill the container */
+  justify-content: center;
+  align-items: center;
+}
+
+/* Style the button container */
+.buttons-container {
+  display: flex; /* Arrange buttons horizontally */
+  justify-content: space-around; /* Space out buttons */
+  align-items: center;
+  padding: 10px 5px; /* Add some padding */
+  flex-shrink: 0; /* Prevent this container from shrinking */
+  /* Optional: Add a background for better visibility over the video */
+  /* background-color: rgba(0, 0, 0, 0.5); */
+  z-index: 10; /* Ensure buttons are above the video feed */
+}
+
+/* Optional: Adjust padding on IonContent if needed */
+/* If you have ion-padding on IonContent, it might interfere */
+/* ion-content.ion-padding {
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+} */
+
+/* Ensure the VideoCapture component's elements fill their container */
+.video-capture .container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.video-capture .media-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Cover the area, might crop */
+  /* or use object-fit: contain; if you want to see the whole video */
+}
+
+/* Ensure canvas is on top */
+.video-capture #canvas-preview {
+  z-index: 5;
 }
