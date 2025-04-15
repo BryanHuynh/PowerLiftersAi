@@ -25,7 +25,7 @@ export const fetch_img = (date: string, category: Lift):string[] => {
 
 export const getYearMonthDayFromFileNames = (filenames: string[]): Map<string, string[]> => {
 	const ret: Map<string, string[]> = new Map()
-	const regex = /(\d{4})-(\d)-(\d)/
+	const regex = /(\d{4})-(\d+)-(\d+)/
 	const re = new RegExp(regex)
 	filenames.forEach((filename) => {
 		const match = filename.match(re)

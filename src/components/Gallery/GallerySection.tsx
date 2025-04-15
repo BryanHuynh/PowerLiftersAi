@@ -1,34 +1,43 @@
-import { IonCard, IonCardContent, IonImg, IonItem } from "@ionic/react";
-import { fetch_img } from "../../utils/FetchImage";
-import "./GallerySection.css";
-import { Lift } from "../../Constants/Constants";
+import {
+	IonCard,
+	IonCardContent,
+	IonImg,
+	IonItem,
+	IonThumbnail
+} from '@ionic/react'
+import { fetch_img } from '../../utils/FetchImage'
+import './GallerySection.css'
+import { Lift } from '../../Constants/Constants'
 
 interface GallerySectionProps {
-  date: string;
-  category: Lift;
+	date: string
+	albumIdentifier: string
+	filenames: string[]
 }
 
-const GallerySection: React.FC<GallerySectionProps> = ({ date, category }) => {
-  const renderImageDate = (date: string, category: Lift) => {
-    const images = fetch_img(date, category);
-    const mappedImagesToRender = images.map((image, index) => {
-      return (
-          <IonImg className="gallery-img" src={image} key={index} />
-      );
-    });
-    return <>{mappedImagesToRender}</>;
-  };
+const GallerySection: React.FC<GallerySectionProps> = ({
+	date,
+	albumIdentifier,
+	filenames
+}) => {
 
-  return (
-    <IonCard className='card'> 
-      <IonCardContent>
-        <h2>{date}</h2>
-        <div className="gallery-grid">
-          {renderImageDate(date, category)}
-        </div>
-      </IonCardContent>
-    </IonCard>
-  );
-};
 
-export default GallerySection;
+  
+	return (
+		<IonCard className="card">
+			<IonCardContent>
+				<h2>{date}</h2>
+				<div className="gallery-grid">
+					<IonThumbnail>
+						<img
+							alt="Silhouette of mountains"
+							src="https://ionicframework.com/docs/img/demos/thumbnail.svg"
+						/>
+					</IonThumbnail>
+				</div>
+			</IonCardContent>
+		</IonCard>
+	)
+}
+
+export default GallerySection

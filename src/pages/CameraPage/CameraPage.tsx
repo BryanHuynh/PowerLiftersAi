@@ -95,7 +95,7 @@ const CameraPage: React.FC = () => {
 			await saveMedia(
 				lift,
 				mediaBlobRef.current,
-				`${_data['category']}_${getCurrentDateToMinutes()}.mp4`
+				`${_data['category']}_${getCurrentDateToMinutes()}`
 			)
 			mediaBlobRef.current = null
 		}
