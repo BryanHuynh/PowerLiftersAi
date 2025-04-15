@@ -20,9 +20,6 @@ const GallerySection: React.FC<GallerySectionProps> = ({
 	albumIdentifier,
 	filenames
 }) => {
-
-
-  
 	return (
 		<IonCard className="card">
 			<IonCardContent>
