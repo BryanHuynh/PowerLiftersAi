@@ -1,17 +1,22 @@
-import { useEffect, useRef, useState } from 'react'
+import { forwardRef, SetStateAction, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { Camera } from '@capacitor/camera'
 import './VideoCapture.css'
 import { DrawingUtils, PoseLandmarker, FilesetResolver, PoseLandmarkerResult } from '@mediapipe/tasks-vision'
 import { Capacitor } from '@capacitor/core'
 
-interface VideoCameraProps {
-	deviceId: string
-	trackingOverlayRef: React.RefObject<boolean>
-	isRecording: boolean
-	onRecordingFinished: (blob: Blob) => void;
+export interface VideoCaptureHandle {
+	startRecording: () => void
+	stopRecording: () => void
+	startTracking: () => void
+	stopTracking: () => void
 }
 
-const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef, isRecording, onRecordingFinished}) => {
+interface VideoCameraProps {
+	deviceId: string
+	onRecordingFinished: (blob: Blob) => void
+}
+
+const VideoCapture = forwardRef<VideoCaptureHandle, VideoCameraProps>(({ deviceId, onRecordingFinished }, ref) => {
 	const videoRef = useRef<HTMLVideoElement | null>(null)
 	const canvasRef = useRef<HTMLCanvasElement | null>(null)
 	const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null)
@@ -19,6 +24,7 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef
 	const poseLandmarkerRef = useRef<PoseLandmarker>(null)
 	const mediaRecorderRef = useRef<MediaRecorder | null>(null)
 	const recordedChunksRef = useRef<Blob[]>([])
+	const trackingOverlayRef = useRef<boolean>(false)
 
 	const wasmUrl: string = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.9/wasm'
 	const modelAssetPath: string = 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/latest/pose_landmarker_heavy.task'
@@ -35,25 +41,19 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef
 	}
 
 	async function requestPermissions() {
-		const status = await Camera.requestPermissions()
-		console.log('VIDEO CAPTURE:', status.camera, navigator.mediaDevices)
+		await Camera.requestPermissions()
 	}
 
 	const displayVideoDetections = (result: PoseLandmarkerResult, drawingUtils: DrawingUtils, canvasCtx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
-		if (trackingOverlayRef.current) {
-			canvasCtx.save()
-			// canvasCtx.clearRect(0, 0, canvas.width, canvas.height)
-			const landmarks = result.landmarks
-			// console.log('Shoulder', landmarks[0][12])
-			// console.log('elbow', landmarks[0][14])
-			for (const landmark of landmarks) {
-				drawingUtils.drawLandmarks(landmark, {
-					radius: (data) => DrawingUtils.lerp(data.from!.z, -0.15, 0.1, 5, 1)
-				})
-				drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS)
-			}
-			canvasCtx.restore()
+		canvasCtx.save()
+		const landmarks = result.landmarks
+		for (const landmark of landmarks) {
+			drawingUtils.drawLandmarks(landmark, {
+				radius: (data) => DrawingUtils.lerp(data.from!.z, -0.15, 0.1, 5, 1)
+			})
+			drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS)
 		}
+		canvasCtx.restore()
 	}
 
 	const startTracking = async () => {
@@ -64,8 +64,10 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef
 			const startTimeMs = performance.now()
 			if (lastVideoTime != videoRef.current.currentTime) {
 				lastVideoTime = videoRef.current.currentTime
-				// const landMarkerResults = poseLandmarkerRef.current.detectForVideo(videoRef.current, startTimeMs)
-				// displayVideoDetections(landMarkerResults, drawingUtils, canvasCtxRef.current, canvasRef.current)
+				if (trackingOverlayRef && trackingOverlayRef.current) {
+					const landMarkerResults = poseLandmarkerRef.current.detectForVideo(videoRef.current, startTimeMs)
+					displayVideoDetections(landMarkerResults, drawingUtils, canvasCtxRef.current, canvasRef.current)
+				}
 			}
 
 			window.requestAnimationFrame(startTracking)
@@ -88,11 +90,10 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef
 			video: {
 				deviceId: { exact: deviceId },
 				width: { ideal: 4096 },
-				height: { ideal: 2160 } 
+				height: { ideal: 2160 }
 			}
 		}
 		const stream = await navigator.mediaDevices.getUserMedia(constraints)
-		console.log('VideoCapture.tsx: loaded device: ', stream.id)
 		if (videoRef.current) {
 			videoRef.current.srcObject = stream
 		}
@@ -114,36 +115,8 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef
 		}
 	}
 
-	const startRecording = () => {
-		if (streamRef.current) {
-			recordedChunksRef.current = []
-			streamRef.current.getTracks().forEach((track) => {
-				console.log('compatibilties: ', JSON.stringify(track.getCapabilities()))
-				console.log('settings: ', JSON.stringify(track.getSettings()))
-				console.log('id:', track.id)
-			})
-			const recorder = new MediaRecorder(streamRef.current, { mimeType: 'video/mp4' })
-			mediaRecorderRef.current = recorder
-
-			recorder.ondataavailable = (event) => {
-				if (event.data.size > 0) {
-					recordedChunksRef.current.push(event.data)
-				}
-			}
-
-			recorder.onstop = () => {
-				console.log('Recording stopped');
-				const blob = new Blob(recordedChunksRef.current, { type: 'video/mp4' });
-				onRecordingFinished(blob);
-			}
-
-			recorder.start()
-		}
-	}
-
 	useEffect(() => {
 		stopWebcam()
-		console.log('VideoCamera.tsx: camera device id: ', deviceId)
 		const intialize = async () => {
 			if (canvasRef.current) {
 				canvasCtxRef.current = canvasRef.current.getContext('2d')
@@ -156,22 +129,55 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef
 		}
 		intialize()
 		return () => {
-			console.log('VideoCapture.tsx: unloaded component')
 			stopWebcam()
 		}
 	}, [deviceId])
 
-	useEffect(() => {
-		if (isRecording) {
-			console.log('recording started')
-			startRecording()
+	const _stopRecording = () => {
+		if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+			console.log('Stopping recording...')
+			mediaRecorderRef.current.stop() // This triggers the 'onstop' event handler
 		} else {
-			mediaRecorderRef.current?.stop()
+			console.warn("Cannot stop recording: No active recorder found or recorder not in 'recording' state.")
 		}
-		console.log(isRecording);
+	}
 
-		return () => {}
-	}, [isRecording])
+	const _startRecording = () => {
+		if (streamRef.current) {
+			recordedChunksRef.current = []
+			const recorder = new MediaRecorder(streamRef.current, { mimeType: 'video/mp4' })
+			mediaRecorderRef.current = recorder
+
+			recorder.ondataavailable = (event) => {
+				if (event.data.size > 0) {
+					recordedChunksRef.current.push(event.data)
+				}
+			}
+
+			recorder.onstop = () => {
+				console.log('Recording stopped')
+				const blob = new Blob(recordedChunksRef.current, { type: 'video/mp4' })
+				onRecordingFinished(blob)
+			}
+
+			recorder.start()
+		}
+	}
+
+	const _startTrackingOverlay = () => {
+		trackingOverlayRef.current = true
+	}
+
+	const _stopTrackingOverlay = () => {
+		trackingOverlayRef.current = false
+	}
+
+	useImperativeHandle(ref, () => ({
+		startRecording: _startRecording,
+		stopRecording: _stopRecording,
+		startTracking: _startTrackingOverlay,
+		stopTracking: _stopTrackingOverlay
+	}))
 
 	return (
 		<div className="container">
@@ -179,6 +185,6 @@ const VideoCapture: React.FC<VideoCameraProps> = ({ deviceId, trackingOverlayRef
 			<video className="media-preview" id="camera-preview" ref={videoRef} autoPlay playsInline></video>
 		</div>
 	)
-}
+})
 
 export default VideoCapture

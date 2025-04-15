@@ -1,4 +1,5 @@
 import { IonBackButton, IonButton, IonButtons, IonContent, IonHeader, IonModal, IonPage, IonTitle, IonToolbar } from '@ionic/react'
+import { Lift } from '../../Constants/Constants';
 
 interface CameraForm {
 	isOpen: boolean
@@ -8,7 +9,7 @@ interface CameraForm {
 
 const CameraForm: React.FC<CameraForm> = ({ isOpen, onClose, onSubmit}) => {
 	const _onClose = () => {
-		const data = { 'category' : 'Deadlift'}
+		const data = { 'category' : Lift.DEADLIFT}
 		onSubmit(JSON.stringify(data)); 
 		onClose();
 	}

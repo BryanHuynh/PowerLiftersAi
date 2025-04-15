@@ -1,13 +1,11 @@
-import { Lift, LiftDirectoryPathType, VIDEO_DIRECTORY_PATH, liftDirectoryPaths } from '../Constants/Constants'
-import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'
+import { Lift} from '../Constants/Constants'
 import { MediaSaveOptions, Media } from '@capacitor-community/media'
 
-export const saveMedia = async (category: LiftDirectoryPathType, blob: Blob, filename: string) => {
-	const albumPath = await createAlbum(Lift.SQUAT)
-  const videoURL = await convertBlobToBase64(blob) as string;
-	const opts: MediaSaveOptions = { path: videoURL, albumIdentifier: albumPath }
+export const saveMedia = async (lift: Lift, blob: Blob, filename: string) => {
+	const albumPath = await createAlbum(lift)
+	const videoURL = (await convertBlobToBase64(blob)) as string
+	const opts: MediaSaveOptions = { path: videoURL, albumIdentifier: albumPath, fileName: filename }
 	await Media.saveVideo(opts)
-
 }
 
 const createAlbum = async (lift: Lift): Promise<string> => {
@@ -25,9 +23,9 @@ function convertBlobToBase64(blob: Blob): Promise<string | ArrayBuffer> {
 	return new Promise((resolve, reject) => {
 		const reader = new FileReader()
 		reader.onerror = reject
-    reader.onload = () => {
-      resolve(reader.result!.toString());
-    };
+		reader.onload = () => {
+			resolve(reader.result!.toString())
+		}
 		reader.readAsDataURL(blob) // Use readAsDataURL to get base64
 	})
 }
