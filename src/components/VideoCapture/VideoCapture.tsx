@@ -64,8 +64,8 @@ const VideoCapture = forwardRef<VideoCaptureHandle, VideoCameraProps>(({ deviceI
 			const startTimeMs = performance.now()
 			if (lastVideoTime != videoRef.current.currentTime) {
 				lastVideoTime = videoRef.current.currentTime
-				if (trackingOverlayRef && trackingOverlayRef.current) {
-					const landMarkerResults = poseLandmarkerRef.current.detectForVideo(videoRef.current, startTimeMs)
+        const landMarkerResults = poseLandmarkerRef.current.detectForVideo(videoRef.current, startTimeMs)
+      if (trackingOverlayRef && trackingOverlayRef.current) {
 					displayVideoDetections(landMarkerResults, drawingUtils, canvasCtxRef.current, canvasRef.current)
 				}
 			}
