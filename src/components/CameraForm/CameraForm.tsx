@@ -9,7 +9,7 @@ interface CameraForm {
 
 const CameraForm: React.FC<CameraForm> = ({ isOpen, onClose, onSubmit}) => {
 	const _onClose = () => {
-		const data = { 'category' : Lift.DEADLIFT}
+		const data = { 'category' : Lift.SQUAT}
 		onSubmit(JSON.stringify(data)); 
 		onClose();
 	}
