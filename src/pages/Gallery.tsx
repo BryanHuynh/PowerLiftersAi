@@ -10,13 +10,13 @@ import {
 import { useParams } from 'react-router-dom'
 import Footer from '../components/Footer/Footer'
 import GallerySection, {
+	FileContents,
 	GalleryDateFile
 } from '../components/Gallery/GallerySection'
 import { useEffect, useState } from 'react'
 import { Lift, stringToLiftCategory } from '../Constants/Constants'
 import { getYearMonthDayFromFileNames } from '../utils/FetchImage'
-import { Media } from '@capacitor-community/media'
-import { Filesystem } from '@capacitor/filesystem'
+import { Directory, Filesystem as FS } from '@capacitor/filesystem'
 
 const Gallery: React.FC = () => {
 	const params = useParams<{ category: string }>()
@@ -36,65 +36,65 @@ const Gallery: React.FC = () => {
 		}
 	}, [albumIdentifier, isError])
 
-	useEffect(() => {
-	}, [fileDates])
+	useEffect(() => {}, [fileDates])
 
 	const fetchAlbumIdentifer = async (lift: Lift) => {
-		const { albums } = await Media.getAlbums()
-		const albumIdentifier = albums.find(
-			(album) => album.name === lift
-		)?.identifier
+		const albums = await FS.readdir({
+			path: 'PowerLiftAi',
+			directory: Directory.Documents
+		})
+		let album
+		try {
+			if (!albums || albums.files.length === 0) {
+				throw new Error('no albums found')
+			}
 
-		if (albumIdentifier) {
-			setAlbumIdentifier(albumIdentifier)
-		} else {
+			album = albums.files.find((album) => album.name === lift)
+			if (!album) {
+				throw new Error(`unable to find album: ${lift}`)
+			}
+		} catch {
 			setIsError(true)
-			setErrorMessage('unable to find album for: ' + lift.toString())
+			setErrorMessage(`unable to find album: ${lift}`)
+			return
 		}
+		setAlbumIdentifier(album?.uri.split('/').slice(-2).join('/'))
 	}
 
 	const readAlbum = async () => {
-		if (albumIdentifier) {
-			const contents = await Filesystem.readdir({ path: albumIdentifier })
-			if (contents.files.length === 0) {
-				setIsError(true)
-				setErrorMessage('No files in album: ' + albumIdentifier + '.')
-				return
-			}
-			const filenames = contents.files
-				.filter((file) =>
-					file.name.endsWith('.jpg') || file.name.endsWith('.png')
-						? false
-						: true
-				)
-				.map((file) => file.name)
-			const dateFileMapping = getYearMonthDayFromFileNames(filenames)
-			setFileDates(dateFileMapping)
-		} else {
+		if (!albumIdentifier) return
+		const contents = await FS.readdir({
+			path: albumIdentifier,
+			directory: Directory.Documents
+		})
+		if (contents.files.length === 0) {
 			setIsError(true)
-			setErrorMessage('unable to find album for: ' + albumIdentifier)
+			setErrorMessage('No files in album: ' + albumIdentifier + '.')
+			throw new Error('No files in album: ' + albumIdentifier + '.')
 		}
+
+		const filenames = contents.files.map((file) => file.name)
+
+		const dateFileMapping = getYearMonthDayFromFileNames(filenames)
+		console.log(dateFileMapping)
+		setFileDates(dateFileMapping)
+	}
+
+	const seperateMediaAndThumbnails = (files: string[]) => {
+		const fileMapping = new Map<string, {filename?: string, thumbnail?: string}>()
+		files.forEach((file) => {
+			const [filename, extension] = file.split('.')
+			console.log(filename, extension);
+		})
+		return fileMapping
 	}
 
 	const generateGallery = () => {
 		if (fileDates && fileDates.size > 0 && albumIdentifier) {
-			return Array.from(fileDates.entries()).map(([date, filenames]) => {
-				const galleryDateFile: GalleryDateFile = {
-					file: filenames.map((filename) => {
-						return {
-							filename: filename,
-							albumIdentifier: albumIdentifier,
-							thumbnailPath: filename.split('.')[0] + '.png'
-						}
-					})
-				}
-				return (
-					<GallerySection
-						date={date}
-						galleryDateFile={galleryDateFile}
-					></GallerySection>
-				)
-			})
+			fileDates.forEach((files, date) => {
+				seperateMediaAndThumbnails(files);
+			});
+
 		}
 		return null
 	}
@@ -115,9 +115,8 @@ const Gallery: React.FC = () => {
 						<h1>{errorMessage}</h1>
 					</>
 				) : null}
-
-				{generateGallery()}
 			</IonContent>
+			{generateGallery()}
 
 			<Footer current="none" />
 		</IonPage>
