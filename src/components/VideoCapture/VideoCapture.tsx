@@ -54,19 +54,19 @@ const VideoCapture = forwardRef<VideoCaptureHandle, VideoCameraProps>(
 					},
 					// outputSegmentationMasks: true, // We will draw the face mesh in canvas.
 					runningMode: 'VIDEO',
-					numPoses: 1			
+					numPoses: 1
 				}
 			)
 		}
 
 		async function requestPermissions() {
-			await Camera.requestPermissions();
+			await Camera.requestPermissions()
 		}
 
 		const displayVideoDetections = (
 			result: PoseLandmarkerResult,
 			drawingUtils: DrawingUtils,
-			canvasCtx: CanvasRenderingContext2D,
+			canvasCtx: CanvasRenderingContext2D
 		) => {
 			canvasCtx.save()
 			const landmarks = result.landmarks
@@ -96,17 +96,16 @@ const VideoCapture = forwardRef<VideoCaptureHandle, VideoCameraProps>(
 				const startTimeMs = performance.now()
 				if (lastVideoTime != videoRef.current.currentTime) {
 					lastVideoTime = videoRef.current.currentTime
-
-					const landMarkerResults =
-						poseLandmarkerRef.current.detectForVideo(
-							videoRef.current,
-							startTimeMs
-						)
 					if (trackingOverlayRef && trackingOverlayRef.current) {
+						const landMarkerResults =
+							poseLandmarkerRef.current.detectForVideo(
+								videoRef.current,
+								startTimeMs
+							)
 						displayVideoDetections(
 							landMarkerResults,
 							drawingUtils,
-							canvasCtxRef.current,
+							canvasCtxRef.current
 						)
 					}
 				}
@@ -199,7 +198,7 @@ const VideoCapture = forwardRef<VideoCaptureHandle, VideoCameraProps>(
 			if (streamRef.current) {
 				recordedChunksRef.current = []
 				const recorder = new MediaRecorder(streamRef.current, {
-					mimeType: 'video/mp4'
+					mimeType: 'video/webm;codecs=vp9'
 				})
 				mediaRecorderRef.current = recorder
 
@@ -212,7 +211,7 @@ const VideoCapture = forwardRef<VideoCaptureHandle, VideoCameraProps>(
 				recorder.onstop = () => {
 					console.log('Recording stopped')
 					const blob = new Blob(recordedChunksRef.current, {
-						type: 'video/mp4'
+						type: 'video/webm'
 					})
 					onRecordingFinished(blob)
 				}
