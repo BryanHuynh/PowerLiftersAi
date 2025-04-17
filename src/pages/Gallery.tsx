@@ -9,7 +9,9 @@ import {
 } from '@ionic/react'
 import { useParams } from 'react-router-dom'
 import Footer from '../components/Footer/Footer'
-import GallerySection from '../components/Gallery/GallerySection'
+import GallerySection, {
+	GalleryDateFile
+} from '../components/Gallery/GallerySection'
 import { useEffect, useState } from 'react'
 import { Lift, stringToLiftCategory } from '../Constants/Constants'
 import { getYearMonthDayFromFileNames } from '../utils/FetchImage'
@@ -25,7 +27,6 @@ const Gallery: React.FC = () => {
 	const [fileDates, setFileDates] = useState<Map<string, string[]>>()
 
 	useEffect(() => {
-		console.log(category)
 		fetchAlbumIdentifer(category)
 	}, [category])
 
@@ -36,7 +37,6 @@ const Gallery: React.FC = () => {
 	}, [albumIdentifier, isError])
 
 	useEffect(() => {
-		console.log(fileDates)
 	}, [fileDates])
 
 	const fetchAlbumIdentifer = async (lift: Lift) => {
@@ -56,13 +56,18 @@ const Gallery: React.FC = () => {
 	const readAlbum = async () => {
 		if (albumIdentifier) {
 			const contents = await Filesystem.readdir({ path: albumIdentifier })
-			console.log(contents.files.length)
 			if (contents.files.length === 0) {
 				setIsError(true)
 				setErrorMessage('No files in album: ' + albumIdentifier + '.')
 				return
 			}
-			const filenames = contents.files.map((file) => file.name)
+			const filenames = contents.files
+				.filter((file) =>
+					file.name.endsWith('.jpg') || file.name.endsWith('.png')
+						? false
+						: true
+				)
+				.map((file) => file.name)
 			const dateFileMapping = getYearMonthDayFromFileNames(filenames)
 			setFileDates(dateFileMapping)
 		} else {
@@ -74,12 +79,20 @@ const Gallery: React.FC = () => {
 	const generateGallery = () => {
 		if (fileDates && fileDates.size > 0 && albumIdentifier) {
 			return Array.from(fileDates.entries()).map(([date, filenames]) => {
+				const galleryDateFile: GalleryDateFile = {
+					file: filenames.map((filename) => {
+						return {
+							filename: filename,
+							albumIdentifier: albumIdentifier,
+							thumbnailPath: filename.split('.')[0] + '.png'
+						}
+					})
+				}
 				return (
 					<GallerySection
 						date={date}
-						albumIdentifier={albumIdentifier}
-						filenames={filenames}
-					/>
+						galleryDateFile={galleryDateFile}
+					></GallerySection>
 				)
 			})
 		}
