@@ -26,7 +26,10 @@ const Gallery: React.FC = () => {
 	const [fileDates, setFileDates] = useState<Map<string, string[]>>()
 
 	useEffect(() => {
-		fetchAlbumIdentifer(category)
+		fetchAlbumIdentifer(category).catch((error) => {
+			setIsError(true)
+			setErrorMessage(error.message)
+		})
 	}, [category])
 
 	useEffect(() => {
@@ -41,22 +44,21 @@ const Gallery: React.FC = () => {
 		const albums = await FS.readdir({
 			path: 'PowerLiftAi',
 			directory: Directory.Documents
+		}).catch((err) => {
+			throw new Error(
+				'unable to read albums directory: ERROR: ' + err.message + '.'
+			)
 		})
-		let album
-		try {
-			if (!albums || albums.files.length === 0) {
-				throw new Error('no albums found')
-			}
 
-			album = albums.files.find((album) => album.name === lift)
-			if (!album) {
-				throw new Error(`unable to find album: ${lift}`)
-			}
-		} catch {
-			setIsError(true)
-			setErrorMessage(`unable to find album: ${lift}`)
-			return
+		if (!albums || albums.files.length === 0) {
+			throw new Error('no albums found')
 		}
+
+		const album = albums.files.find((album) => album.name === lift)
+		if (!album) {
+			throw new Error(`unable to find album: ${lift}. Record a video for ${lift} to generate an album`)
+		}
+
 		setAlbumIdentifier(album?.uri.split('/').slice(-2).join('/'))
 	}
 
@@ -80,6 +82,7 @@ const Gallery: React.FC = () => {
 	}
 
 	const generateGallery = () => {
+		if (isError) return <h1>{errorMessage}</h1>
 		const elements: JSX.Element[] = []
 		if (fileDates && fileDates.size > 0 && albumIdentifier) {
 			fileDates.forEach((files, date) => {
@@ -87,10 +90,9 @@ const Gallery: React.FC = () => {
 				files.forEach(async (file) => {
 					fileContents.push({
 						filename: file,
-						albumIdentifier: albumIdentifier,
+						albumIdentifier: albumIdentifier
 					})
 				})
-				console.log(fileContents)
 				const element = (
 					<GallerySection date={date} fileContents={fileContents} />
 				)
@@ -112,11 +114,6 @@ const Gallery: React.FC = () => {
 				</IonToolbar>
 			</IonHeader>
 			<IonContent fullscreen className="ion-padding">
-				{isError ? (
-					<>
-						<h1>{errorMessage}</h1>
-					</>
-				) : null}
 				{generateGallery()}
 			</IonContent>
 
