@@ -9,16 +9,13 @@ import {
 } from '@ionic/react'
 import { useParams } from 'react-router-dom'
 import Footer from '../components/Footer/Footer'
-import GallerySection, {
-	FileContents,
-	GalleryDateFile
-} from '../components/Gallery/GallerySection'
 import { useEffect, useState } from 'react'
 import { Lift, stringToLiftCategory } from '../Constants/Constants'
 import { getYearMonthDayFromFileNames } from '../utils/FetchImage'
 import { Directory, Filesystem as FS } from '@capacitor/filesystem'
-import { getThumbnail } from '../utils/MediaSaving'
 import { JSX } from 'react/jsx-runtime'
+import FileContents from '../components/Gallery/FileContents'
+import GallerySection from '../components/Gallery/GallerySection'
 
 const Gallery: React.FC = () => {
 	const params = useParams<{ category: string }>()
@@ -78,7 +75,7 @@ const Gallery: React.FC = () => {
 		const filenames = contents.files.map((file) => file.name)
 
 		const dateFileMapping = getYearMonthDayFromFileNames(filenames)
-		console.log(dateFileMapping)
+		// console.log(dateFileMapping)
 		setFileDates(dateFileMapping)
 	}
 
@@ -91,9 +88,6 @@ const Gallery: React.FC = () => {
 					fileContents.push({
 						filename: file,
 						albumIdentifier: albumIdentifier,
-						thumbnailPath: await getThumbnail(
-							`${albumIdentifier}/${file}`
-						)
 					})
 				})
 				console.log(fileContents)

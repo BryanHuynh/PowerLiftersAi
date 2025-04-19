@@ -69,7 +69,7 @@ export const getThumbnail = async (mediaPath: string): Promise<string> => {
 			if (ctx) {
 				ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
 				const dataUrl = canvas.toDataURL('image/png') // or 'image/jpeg'
-				console.log(dataUrl)
+				// console.log(dataUrl)
 				resolve(dataUrl)
 			} else {
 				reject(new Error('Could not get canvas context'))
@@ -93,14 +93,6 @@ export const saveMedia = async (lift: Lift, blob: Blob, filename: string) => {
 		data: videoURL
 	}
 	await FS.writeFile(mediaOptions)
-
-	// const thumbnail = await getThumbnail(blob)
-	// const thumbnailOptions: WriteFileOptions = {
-	// 	path: `${path}/${filename}.png`,
-	// 	directory: Directory.Documents,
-	// 	data: thumbnail
-	// }
-	// await FS.writeFile(thumbnailOptions)
 }
 
 function convertBlobToBase64(blob: Blob): Promise<string | ArrayBuffer> {

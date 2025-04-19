@@ -1,19 +1,16 @@
-import { IonCard, IonCardContent, IonThumbnail } from '@ionic/react'
+import { IonCard, IonCardContent } from '@ionic/react'
 
 import './GallerySection.css'
 
-import { useEffect } from 'react'
+import Thumbnail from './Thumbnail'
+import FileContents from './FileContents'
 
 interface GallerySectionProps {
 	date: string
 	fileContents: FileContents[]
 }
 
-export interface FileContents {
-	filename: string
-	albumIdentifier: string
-	thumbnailPath: string
-}
+
 
 const GallerySection: React.FC<GallerySectionProps> = ({
 	date,
@@ -25,12 +22,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({
 				<h2>{date}</h2>
 				<div className="gallery-grid">
 					{fileContents.map((file) => (
-						<IonThumbnail>
-							<img
-								alt={file.albumIdentifier + '/' + file.filename}
-								src={file.thumbnailPath}
-							/>
-						</IonThumbnail>
+						<Thumbnail fileContents={file} />
 					))}
 				</div>
 			</IonCardContent>
