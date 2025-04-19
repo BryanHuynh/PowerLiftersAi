@@ -1,4 +1,7 @@
 export const fetchCameraDeviceIds = async (): Promise<string[]> => {
+	if(!navigator.mediaDevices) {
+		throw new Error('unable to get media devices');
+	}
 	const tempStream = await navigator.mediaDevices.getUserMedia({
 		video: true
 	})

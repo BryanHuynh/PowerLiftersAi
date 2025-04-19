@@ -135,9 +135,9 @@ const VideoCapture = forwardRef<VideoCaptureHandle, VideoCameraProps>(
 					height: { ideal: 2160 }
 				}
 			}
-			const stream = await navigator.mediaDevices.getUserMedia(
-				constraints
-			)
+
+			const stream = await navigator.mediaDevices
+				.getUserMedia(constraints)
 			if (videoRef.current) {
 				videoRef.current.srcObject = stream
 			}
