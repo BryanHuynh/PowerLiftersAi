@@ -14,3 +14,8 @@
     margin-left: 0;
     margin-right: 0;
 }
+
+ion-thumbnail {
+    --size: 1fr;
+    --border-radius: 14px;
+}

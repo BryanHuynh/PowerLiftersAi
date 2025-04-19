@@ -17,6 +17,8 @@ import { useEffect, useState } from 'react'
 import { Lift, stringToLiftCategory } from '../Constants/Constants'
 import { getYearMonthDayFromFileNames } from '../utils/FetchImage'
 import { Directory, Filesystem as FS } from '@capacitor/filesystem'
+import { getThumbnail } from '../utils/MediaSaving'
+import { JSX } from 'react/jsx-runtime'
 
 const Gallery: React.FC = () => {
 	const params = useParams<{ category: string }>()
@@ -80,21 +82,27 @@ const Gallery: React.FC = () => {
 		setFileDates(dateFileMapping)
 	}
 
-	const seperateMediaAndThumbnails = (files: string[]) => {
-		const fileMapping = new Map<string, {filename?: string, thumbnail?: string}>()
-		files.forEach((file) => {
-			const [filename, extension] = file.split('.')
-			console.log(filename, extension);
-		})
-		return fileMapping
-	}
-
 	const generateGallery = () => {
+		const elements: JSX.Element[] = []
 		if (fileDates && fileDates.size > 0 && albumIdentifier) {
 			fileDates.forEach((files, date) => {
-				seperateMediaAndThumbnails(files);
-			});
-
+				const fileContents: FileContents[] = []
+				files.forEach(async (file) => {
+					fileContents.push({
+						filename: file,
+						albumIdentifier: albumIdentifier,
+						thumbnailPath: await getThumbnail(
+							`${albumIdentifier}/${file}`
+						)
+					})
+				})
+				console.log(fileContents)
+				const element = (
+					<GallerySection date={date} fileContents={fileContents} />
+				)
+				elements.push(element)
+			})
+			return elements
 		}
 		return null
 	}
@@ -115,8 +123,8 @@ const Gallery: React.FC = () => {
 						<h1>{errorMessage}</h1>
 					</>
 				) : null}
+				{generateGallery()}
 			</IonContent>
-			{generateGallery()}
 
 			<Footer current="none" />
 		</IonPage>

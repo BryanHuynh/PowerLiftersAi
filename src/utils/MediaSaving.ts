@@ -29,12 +29,30 @@ const _createAlbum = async (path: string): Promise<string> => {
 	return directoryStatus.uri
 }
 
-const getThumbnail = async (blob: Blob): Promise<string> => {
+export const getThumbnail = async (mediaPath: string): Promise<string> => {
+	const mimeType = 'video/webm';
+
+	const readFileResult = await FS.readFile({
+		path: mediaPath,
+		directory: Directory.Documents
+	});
+
+	// 2. Get the base64 string from the result
+	// The result.data is the base64 encoded string
+	const base64Data = readFileResult.data as string;
+
+	// 3. Construct the Data URL
+	const videoDataUrl = `data:${mimeType};base64,${base64Data}`;
+
+	console.log(`Attempting to load video from Data URL (length: ${videoDataUrl.length})`);
+
+
+
 	return new Promise((resolve, reject) => {
 		const video = document.createElement('video')
 		const canvas = document.createElement('canvas')
 
-		video.src = URL.createObjectURL(blob)
+		video.src = videoDataUrl
 		video.crossOrigin = 'anonymous'
 		video.muted = true
 		video.playsInline = true
@@ -51,6 +69,7 @@ const getThumbnail = async (blob: Blob): Promise<string> => {
 			if (ctx) {
 				ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
 				const dataUrl = canvas.toDataURL('image/png') // or 'image/jpeg'
+				console.log(dataUrl)
 				resolve(dataUrl)
 			} else {
 				reject(new Error('Could not get canvas context'))
@@ -75,13 +94,13 @@ export const saveMedia = async (lift: Lift, blob: Blob, filename: string) => {
 	}
 	await FS.writeFile(mediaOptions)
 
-	const thumbnail = await getThumbnail(blob)
-	const thumbnailOptions: WriteFileOptions = {
-		path: `${path}/${filename}.png`,
-		directory: Directory.Documents,
-		data: thumbnail
-	}
-	await FS.writeFile(thumbnailOptions)
+	// const thumbnail = await getThumbnail(blob)
+	// const thumbnailOptions: WriteFileOptions = {
+	// 	path: `${path}/${filename}.png`,
+	// 	directory: Directory.Documents,
+	// 	data: thumbnail
+	// }
+	// await FS.writeFile(thumbnailOptions)
 }
 
 function convertBlobToBase64(blob: Blob): Promise<string | ArrayBuffer> {
@@ -102,5 +121,7 @@ export const getCurrentDateToMinutes = () => {
 	const day = now.getDate()
 	const hours = now.getHours()
 	const minutes = now.getMinutes()
-	return `${year}-${month}-${day}-${hours}-${minutes}`
+	const seconds = now.getSeconds()
+
+	return `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`
 }
