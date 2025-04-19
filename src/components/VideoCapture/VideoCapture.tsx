@@ -1,11 +1,4 @@
-import {
-	forwardRef,
-	SetStateAction,
-	useEffect,
-	useImperativeHandle,
-	useRef,
-	useState
-} from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { Camera } from '@capacitor/camera'
 import './VideoCapture.css'
 import {
@@ -136,8 +129,9 @@ const VideoCapture = forwardRef<VideoCaptureHandle, VideoCameraProps>(
 				}
 			}
 
-			const stream = await navigator.mediaDevices
-				.getUserMedia(constraints)
+			const stream = await navigator.mediaDevices.getUserMedia(
+				constraints
+			)
 			if (videoRef.current) {
 				videoRef.current.srcObject = stream
 			}
