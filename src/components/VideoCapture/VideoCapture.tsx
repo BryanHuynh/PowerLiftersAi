@@ -1,13 +1,10 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { Camera } from '@capacitor/camera'
 import './VideoCapture.css'
-import {
-	DrawingUtils,
-	PoseLandmarker,
-	FilesetResolver,
-	PoseLandmarkerResult
-} from '@mediapipe/tasks-vision'
+import { DrawingUtils } from '@mediapipe/tasks-vision'
 import { Capacitor } from '@capacitor/core'
+import PosingStrategy from '../../utils/posingDetection/PosingStrategy'
+import { MediaPose } from '../../utils/posingDetection/Mediapose'
 
 export interface VideoCaptureHandle {
 	startRecording: () => void
@@ -25,94 +22,44 @@ const VideoCapture = forwardRef<VideoCaptureHandle, VideoCameraProps>(
 	({ deviceId, onRecordingFinished }, ref) => {
 		const videoRef = useRef<HTMLVideoElement | null>(null)
 		const canvasRef = useRef<HTMLCanvasElement | null>(null)
-		const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null)
 		const streamRef = useRef<MediaStream | null>(null)
-		const poseLandmarkerRef = useRef<PoseLandmarker>(null)
 		const mediaRecorderRef = useRef<MediaRecorder | null>(null)
 		const recordedChunksRef = useRef<Blob[]>([])
 		const trackingOverlayRef = useRef<boolean>(false)
-
-		const wasmUrl: string =
-			'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.9/wasm'
-		const modelAssetPath: string =
-			'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/latest/pose_landmarker_heavy.task'
-
-		const startPoselandmarker = async () => {
-			return await PoseLandmarker.createFromOptions(
-				await FilesetResolver.forVisionTasks(wasmUrl),
-				{
-					baseOptions: {
-						modelAssetPath: modelAssetPath,
-						delegate: 'GPU'
-					},
-					// outputSegmentationMasks: true, // We will draw the face mesh in canvas.
-					runningMode: 'VIDEO',
-					numPoses: 1
-				}
-			)
-		}
+		const poseLandmarkerRef = useRef<PosingStrategy | null>(null)
 
 		async function requestPermissions() {
 			await Camera.requestPermissions()
 		}
 
-		const displayVideoDetections = (
-			result: PoseLandmarkerResult,
-			drawingUtils: DrawingUtils,
-			canvasCtx: CanvasRenderingContext2D
-		) => {
-			canvasCtx.save()
-			const landmarks = result.landmarks
-			for (const landmark of landmarks) {
-				drawingUtils.drawLandmarks(landmark, {
-					radius: (data) =>
-						DrawingUtils.lerp(data.from!.z, -0.15, 0.1, 5, 1)
-				})
-				drawingUtils.drawConnectors(
-					landmark,
-					PoseLandmarker.POSE_CONNECTIONS
-				)
-			}
-			canvasCtx.restore()
-		}
-
-		const startTracking = async () => {
-			let lastVideoTime = -1
+		const startTracking = () => {
 			if (
-				canvasRef.current &&
-				videoRef.current &&
-				canvasCtxRef.current &&
-				poseLandmarkerRef.current
+				canvasRef.current == null ||
+				videoRef.current == null ||
+				poseLandmarkerRef.current == null
 			) {
-				const drawingUtils = new DrawingUtils(canvasCtxRef.current)
-				resizeCanvasToVideo()
-				const startTimeMs = performance.now()
-				if (lastVideoTime != videoRef.current.currentTime) {
-					lastVideoTime = videoRef.current.currentTime
-					if (trackingOverlayRef && trackingOverlayRef.current) {
-						const landMarkerResults =
-							poseLandmarkerRef.current.detectForVideo(
-								videoRef.current,
-								startTimeMs
-							)
-						displayVideoDetections(
-							landMarkerResults,
-							drawingUtils,
-							canvasCtxRef.current
-						)
-					}
-				}
-
-				window.requestAnimationFrame(startTracking)
+				return
 			}
+			resizeCanvasToVideo()
+			const canvas = canvasRef.current
+			const video = videoRef.current; 
+			const poseLandmarker = poseLandmarkerRef.current;
+			poseLandmarker.detectAndDraw(
+				canvas,
+				video
+			)
+
+			window.requestAnimationFrame(startTracking)
 		}
 
 		const resizeCanvasToVideo = () => {
 			if (canvasRef.current && videoRef.current) {
-				canvasRef.current.width =
-					videoRef.current.getBoundingClientRect().width
-				canvasRef.current.height =
-					videoRef.current.getBoundingClientRect().height
+				const canvas = canvasRef.current
+				const video = videoRef.current
+				if(canvas.width != video.getBoundingClientRect().width || canvas.height != video.getBoundingClientRect().height){
+					canvas.width = video.getBoundingClientRect().width;
+					canvas.height = video.getBoundingClientRect().height;
+				}
 			}
 		}
 
@@ -156,12 +103,10 @@ const VideoCapture = forwardRef<VideoCaptureHandle, VideoCameraProps>(
 		useEffect(() => {
 			stopWebcam()
 			const intialize = async () => {
-				if (canvasRef.current) {
-					canvasCtxRef.current = canvasRef.current.getContext('2d')
-				}
-				poseLandmarkerRef.current = await startPoselandmarker()
+				poseLandmarkerRef.current = new MediaPose()
 				startWebcam()
 				if (videoRef.current) {
+					resizeCanvasToVideo();
 					videoRef.current.addEventListener(
 						'loadeddata',
 						startTracking

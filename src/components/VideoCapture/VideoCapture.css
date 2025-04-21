@@ -17,7 +17,6 @@
   position: absolute; /* Will overlay the video stream. */
   /* top: 45px; Place it aprox. after the button space */
   object-fit: contain;
-  border-color: aqua;
   border-style: solid;
   border-width: 1px;
 }

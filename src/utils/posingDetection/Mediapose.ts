@@ -12,14 +12,16 @@ export class MediaPose implements PosingStrategy {
 	private modelAssetPath: string =
 		'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/latest/pose_landmarker_heavy.task'
 
-	private _poseLandmarker: PoseLandmarker | undefined;
+	private _poseLandmarker: PoseLandmarker
 	private _lastVideoTime: number
 
 	constructor() {
-		this._lastVideoTime = 0
+		this._lastVideoTime = -1
+		this.initalize()
 	}
 
 	async initalize(): Promise<void> {
+		console.log('initalizing media pose')
 		await PoseLandmarker.createFromOptions(
 			await FilesetResolver.forVisionTasks(this.wasmUrl),
 			{
@@ -36,25 +38,27 @@ export class MediaPose implements PosingStrategy {
 		})
 	}
 
-	detectAndDraw(
-		drawingUtils: DrawingUtils,
-		ctx: CanvasRenderingContext2D,
-		videoRef: HTMLVideoElement
-	): void {
+	detectAndDraw(canvas: HTMLCanvasElement, video: HTMLVideoElement): void {
+		if (!canvas || !video) throw new Error('canvas or video is null')
+
 		if (!this._poseLandmarker) {
 			this.initalize()
 		}
-		let landMarkerResults: PoseLandmarkerResult | undefined
-		const startTimeMs = performance.now()
-		if (this._lastVideoTime != videoRef.currentTime) {
-			this._lastVideoTime = videoRef.currentTime
-			landMarkerResults = this._poseLandmarker?.detectForVideo(
-				videoRef,
-				startTimeMs
-			)
+		const ctx = canvas.getContext('2d')
+		if (!ctx) {
+			return
 		}
-		if (!landMarkerResults) return
 
+		const drawingUtils = new DrawingUtils(ctx)
+
+		const timestamp = performance.now()
+		const landMarkerResults: PoseLandmarkerResult =
+			this._poseLandmarker?.detectForVideo(video, timestamp)
+
+		if (!landMarkerResults) {
+			return
+		}
+		ctx.clearRect(0, 0, canvas.width, canvas.height)
 		ctx.save()
 		const landmarks = landMarkerResults.landmarks
 		for (const landmark of landmarks) {
