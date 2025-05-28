@@ -5,6 +5,7 @@ import { DrawingUtils } from '@mediapipe/tasks-vision'
 import { Capacitor } from '@capacitor/core'
 import PosingStrategy from '../../utils/posingDetection/PosingStrategy'
 import { MediaPose } from '../../utils/posingDetection/Mediapose'
+import { PoseNet } from '../../utils/posingDetection/PoseNet'
 
 export interface VideoCaptureHandle {
 	startRecording: () => void

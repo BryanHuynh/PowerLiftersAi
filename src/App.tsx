@@ -38,6 +38,7 @@ import CameraPage from "./pages/CameraPage/CameraPage";
 setupIonicReact();
 
 const App: React.FC = () => (
+  
   <IonApp>
     <IonReactRouter>
       <IonRouterOutlet>

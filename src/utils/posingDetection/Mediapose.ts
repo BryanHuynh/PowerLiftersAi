@@ -46,7 +46,7 @@ export class MediaPose implements PosingStrategy {
 		}
 		const ctx = canvas.getContext('2d')
 		if (!ctx) {
-			return
+			throw new Error('canvas context is null')
 		}
 
 		const drawingUtils = new DrawingUtils(ctx)

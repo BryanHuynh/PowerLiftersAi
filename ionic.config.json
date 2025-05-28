@@ -1,7 +1,23 @@
 {
-  "name": "PowerLiftAi",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "react-vite"
+	"name": "PowerLiftAi",
+	"integrations": {
+		"capacitor": {}
+	},
+	"type": "react-vite",
+	"proxies": [
+		{
+			"path": "/kaggle-api",
+			"proxyUrl": "https://www.kaggle.com/api/v1",
+			"changeOrigin": true
+		},
+		{
+			"path": "/model-proxy",
+			"proxyUrl": "https://www.kaggle.com/models/google/movenet/tfJs/singlepose-lightning/4/",
+			"changeOrigin": true
+		},
+		{
+			"proxyUrl": "https://tfhub.dev",
+			"changeOrigin": true
+		}
+	]
 }
